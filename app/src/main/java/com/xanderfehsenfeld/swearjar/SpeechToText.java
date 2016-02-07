@@ -108,7 +108,7 @@ public class SpeechToText extends Service
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
                     {
-                        // turn off beep sound
+                         //turn off beep sound
 //                        if ( !mIsStreamSolo )
 //                        {
 //                            mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
@@ -145,6 +145,8 @@ public class SpeechToText extends Service
         public void onTick(long millisUntilFinished)
         {
             // TODO Auto-generated method stub
+            //Log.d(TAG, "Timer: " + millisUntilFinished );
+
 
         }
 
@@ -161,6 +163,7 @@ public class SpeechToText extends Service
             }
             catch (RemoteException e)
             {
+                Log.d(TAG, "error starting on timer finish: " + e.getMessage() );
 
             }
             //Log.d(TAG, "countdown finished"); //$NON-NLS-1$
@@ -236,8 +239,12 @@ public class SpeechToText extends Service
         @Override
         public void onError(int error)
         {
-            restartSpeechCycle();
+            //restartSpeechCycle();
             //Log.d(TAG, "error = " + error); //$NON-NLS-1$
+            /* added to make speech recognition "continuous"
+                Not perfect because the speech recognizer is busy translating for a bit
+             */
+            mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
         }
 
         private void restartSpeechCycle(){
@@ -292,7 +299,8 @@ public class SpeechToText extends Service
             t.show();
 
             Bundle bundle = new Bundle();
-            bundle.putInt("result", SpeechAnalyzer.analyzeSpeech( whatWasSaid.get(0) ) );
+            bundle.putInt("score", SpeechAnalyzer.analyzeSpeech( whatWasSaid.get(0) ) );
+            bundle.putStringArrayList("badwords", SpeechAnalyzer.getBadWords(whatWasSaid.get(0)));
             resultReceiver.send(2, bundle);
 
 

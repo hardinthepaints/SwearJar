@@ -9,22 +9,45 @@
     <FrameLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:orientation="vertical">
-        <TextView
-            android:layout_gravity="center_horizontal"
-            android:id="@+id/header"
-            android:text="SWEARCOUNT:"
-            android:textSize="50dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        android:id="@+id/outerLayout"
+        android:layout_centerHorizontal="true">
+
+        <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:id="@+id/innerLayout"
+            >
+            <TextView
+                android:layout_gravity="center_horizontal"
+                android:id="@+id/header"
+                android:text="SWEARCOUNT:"
+                android:visibility="invisible"
+                android:textSize="40dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_gravity="center"
+                android:id="@+id/results_field"
+                android:textSize="100dp"
+                android:text="0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </FrameLayout>
+
+
 
         <TextView
-            android:layout_gravity="center"
-            android:id="@+id/results_field"
-            android:textSize="100dp"
-            android:text="0"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="U"
+        android:textSize="300dp"
+        android:layout_gravity="center"
+        android:id="@+id/jar"/>
+
+
 
     </FrameLayout>
 </RelativeLayout>

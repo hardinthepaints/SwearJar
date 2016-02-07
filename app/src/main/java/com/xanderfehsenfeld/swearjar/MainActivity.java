@@ -1,5 +1,6 @@
 package com.xanderfehsenfeld.swearjar;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,7 +15,19 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.DelayQueue;
 
 
 /** Created By Xander
@@ -71,6 +84,19 @@ public class MainActivity extends Activity {
     /* Make a way to get results from the activity */
     MyResultReceiver resultReceiver;
     TextView textView;
+    TextView header;
+
+    /* animate the swearword falling */
+    Animation animationFalling;
+    TextView badword;
+    Queue<TextView> fallingWords;
+
+    /* match text views to their animations */
+    HashMap<Animation, TextView> animationMap;
+
+    Queue<String> badWordQeue;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +114,51 @@ public class MainActivity extends Activity {
         /* setup result reciever */
         resultReceiver = new MyResultReceiver(null);
         textView = (TextView)findViewById(R.id.results_field);
+        header = (TextView)findViewById(R.id.header);
+
+
+                //badword = getNewSwearView();
+
+        fallingWords = new LinkedList<>();
+        animationMap = new HashMap<>();
+        TextView tv;
+        for (int i = 0; i < 5; i ++){
+            tv = getNewSwearView();
+            animationFalling = AnimationUtils.loadAnimation(this, R.anim.falling);
+            animationFalling.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    TextView animatedView = animationMap.get(animation);
+                    //animatedView.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    TextView animatedView = animationMap.get(animation);
+                    fallingWords.add(animatedView);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+            fallingWords.add(tv);
+            animationMap.put(animationFalling, tv);
+
+        }
+
+        badWordQeue = new LinkedList<>();
+
+    }
+
+    /* inflate a new text view to hold the swearword, add it to the outer framlayout, and rtn */
+    private TextView getNewSwearView(){
+        FrameLayout fl = (FrameLayout) findViewById(R.id.innerLayout);
+        TextView output = (TextView)((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.inflateable_views, null, false);
+        fl.addView(output);
+        output.setGravity(Gravity.CENTER_HORIZONTAL);
+        return output;
 
     }
 
@@ -101,6 +172,16 @@ public class MainActivity extends Activity {
         }
         public void run() {
             textView.setText(updateString);
+
+            /* make the bad words rain */
+            while( !badWordQeue.isEmpty() ) {
+                TextView toAnimate = fallingWords.poll();
+                toAnimate.setText(badWordQeue.poll());
+                toAnimate.startAnimation(animationFalling);
+
+
+            }
+
         }
     }
 
@@ -122,7 +203,8 @@ public class MainActivity extends Activity {
                 runOnUiThread(new UpdateUI(resultData.getString("end")));
             }
             else{
-                swearCount += resultData.getInt("result");
+                swearCount += resultData.getInt("score");
+                badWordQeue.addAll( resultData.getStringArrayList("badwords") );
                 runOnUiThread(new UpdateUI(swearCount + ""));
             }
         }
@@ -137,8 +219,6 @@ public class MainActivity extends Activity {
         i.putExtra("receiver", resultReceiver);
         bindService(i, mServiceConnection, mBindFlag);
     }
-
-
 
 
     @Override
