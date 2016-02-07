@@ -24,6 +24,8 @@ import android.widget.TextView;
  */
 public class MainActivity extends Activity {
 
+    int swearCount = 0;
+
     private static final String TAG = "MainActivity";
 
     /* for binding with service */
@@ -120,7 +122,8 @@ public class MainActivity extends Activity {
                 runOnUiThread(new UpdateUI(resultData.getString("end")));
             }
             else{
-                runOnUiThread(new UpdateUI(resultData.getString("result")));
+                swearCount += resultData.getInt("result");
+                runOnUiThread(new UpdateUI(swearCount + ""));
             }
         }
     }

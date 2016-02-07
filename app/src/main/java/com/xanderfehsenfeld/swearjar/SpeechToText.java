@@ -163,7 +163,7 @@ public class SpeechToText extends Service
             {
 
             }
-            Log.d(TAG, "countdown finished"); //$NON-NLS-1$
+            //Log.d(TAG, "countdown finished"); //$NON-NLS-1$
 
         }
     };
@@ -292,7 +292,7 @@ public class SpeechToText extends Service
             t.show();
 
             Bundle bundle = new Bundle();
-            bundle.putString("result", whatWasSaid.get(0));
+            bundle.putInt("result", SpeechAnalyzer.analyzeSpeech( whatWasSaid.get(0) ) );
             resultReceiver.send(2, bundle);
 
 
