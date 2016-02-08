@@ -87,10 +87,6 @@ public class SpeechAnalyzer {
             put("fellatio", true);
             put("felching", true);
             put("fuck", true);
-            put("f", true);
-            put("u", true);
-            put("c", true);
-            put("k", true);
             put("fudgepacker", true);
             put("fudge", true);
             put("packer", true);
@@ -123,7 +119,6 @@ public class SpeechAnalyzer {
             put("sex", true);
             put("shit", true);
             put("shithead", true);
-            put("s", true);
             put("hit", true);
             put("sh1t", true);
             put("slut", true);

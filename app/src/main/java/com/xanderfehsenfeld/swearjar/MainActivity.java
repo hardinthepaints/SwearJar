@@ -2,6 +2,8 @@ package com.xanderfehsenfeld.swearjar;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +16,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -96,6 +99,10 @@ public class MainActivity extends Activity {
 
     Queue<String> badWordQeue;
 
+    /* intent for the result of clicking the notification (used later in makeNotification )*/
+    Intent resultIntent = new Intent(this, MainActivity.class);
+
+
 
 
     @Override
@@ -115,6 +122,7 @@ public class MainActivity extends Activity {
         resultReceiver = new MyResultReceiver(null);
         textView = (TextView)findViewById(R.id.results_field);
         header = (TextView)findViewById(R.id.header);
+
 
 
                 //badword = getNewSwearView();
@@ -150,6 +158,8 @@ public class MainActivity extends Activity {
 
         badWordQeue = new LinkedList<>();
 
+
+
     }
 
     /* inflate a new text view to hold the swearword, add it to the outer framlayout, and rtn */
@@ -178,7 +188,6 @@ public class MainActivity extends Activity {
                 TextView toAnimate = fallingWords.poll();
                 toAnimate.setText(badWordQeue.poll());
                 toAnimate.startAnimation(animationFalling);
-
 
             }
 
@@ -226,11 +235,53 @@ public class MainActivity extends Activity {
     {
         super.onStop();
 
+        Log.d(TAG, "onStop");
+
         if (mServiceMessenger != null)
         {
             unbindService(mServiceConnection);
             mServiceMessenger = null;
         }
+
+        /* send out the notification when user navigates away from activity */
+        makeNotification();
+
+    }
+
+
+    /* Notification */
+    private void makeNotification(){
+
+        /* create the notification builder */
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.notification_icon)
+                        .setContentTitle("SwearJar")
+                        .setContentText( "Swears: " + swearCount );
+
+
+        // Because clicking the notification opens a new ("special") activity, there's
+        // no need to create an artificial back stack.
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+
+        mBuilder.setContentIntent( resultPendingIntent );
+
+        /* ISSUE THE NOTIFICATION */
+
+        // Sets an ID for the notification
+        int mNotificationId = 001;
+        // Gets an instance of the NotificationManager service
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        // Builds the notification and issues it.
+        mNotifyMgr.notify(mNotificationId, mBuilder.build());
     }
 
 

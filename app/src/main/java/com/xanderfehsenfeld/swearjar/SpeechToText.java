@@ -30,6 +30,7 @@ import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Timer;
 
 public class SpeechToText extends Service
 {
@@ -49,6 +50,9 @@ public class SpeechToText extends Service
     /* send data back to MainActivity */
     ResultReceiver resultReceiver;
 
+    /* keep speech recognizer going */
+    CountDownTimer mTimer;
+
     @Override
     public void onCreate()
     {
@@ -58,7 +62,7 @@ public class SpeechToText extends Service
         mSpeechRecognizer.setRecognitionListener(new SpeechRecognitionListener());
         mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM );
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
                 this.getPackageName());
 
@@ -119,7 +123,7 @@ public class SpeechToText extends Service
                     {
                         target.mSpeechRecognizer.startListening(target.mSpeechRecognizerIntent);
                         target.mIsListening = true;
-                        //Log.d(TAG, "message start listening"); //$NON-NLS-1$
+                        Log.d(TAG, "message start listening"); //$NON-NLS-1$
                     }
                     break;
 
@@ -232,19 +236,16 @@ public class SpeechToText extends Service
             /* added to make speech recognition "continuous"
                 Not perfect because the speech recognizer is busy translating for a bit
              */
-            mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
+            //mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
 
         }
 
         @Override
         public void onError(int error)
         {
-            //restartSpeechCycle();
-            //Log.d(TAG, "error = " + error); //$NON-NLS-1$
-            /* added to make speech recognition "continuous"
-                Not perfect because the speech recognizer is busy translating for a bit
-             */
-            mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
+            restartSpeechCycle();
+            Log.d(TAG, "onError error: " + error); //$NON-NLS-1$
+
         }
 
         private void restartSpeechCycle(){
@@ -287,26 +288,58 @@ public class SpeechToText extends Service
 
             }
             Log.d(TAG, "onReadyForSpeech"); //$NON-NLS-1$
+
+            /* cancel the timer so it doesn't interrupt speech process */
+            Log.d("Timer", "onReadyForSpeech: Cancel Timer");
+            if(mTimer != null) {
+                mTimer.cancel();
+            }
         }
 
         @Override
         public void onResults(Bundle results)
         {
+
+
+
             Log.d(TAG, "onResults"); //$NON-NLS-1$
+
+            //If the timer is available, cancel it so it doesn't interrupt our result processing
+            if(mTimer != null){
+                mTimer.cancel();
+            }
+
             ArrayList<String> whatWasSaid = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
             Log.d(TAG, whatWasSaid.get(0));
             Toast t = Toast.makeText(SpeechToText.this, whatWasSaid.get(0), Toast.LENGTH_LONG);
             t.show();
 
+            /* send info back to parent activity */
             Bundle bundle = new Bundle();
             bundle.putInt("score", SpeechAnalyzer.analyzeSpeech( whatWasSaid.get(0) ) );
             bundle.putStringArrayList("badwords", SpeechAnalyzer.getBadWords(whatWasSaid.get(0)));
             resultReceiver.send(2, bundle);
 
+            /* start listening again */
+            mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
 
+            //Start a timer in case OnReadyForSpeech is never called back (Android Bug?)
+            Log.d("Speech", "onResults: Start a timer");
+            if(mTimer == null) {
+                mTimer = new CountDownTimer(2000, 500) {
+                    @Override
+                    public void onTick(long l) {
+                    }
 
-            //restartSpeechCycle();
-
+                    @Override
+                    public void onFinish() {
+                        Log.d("Speech", "Timer.onFinish: Timer Finished, Restart recognizer");
+                        mSpeechRecognizer.cancel();
+                        mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
+                    }
+                };
+            }
+            mTimer.start();
 
         }
 
@@ -317,4 +350,6 @@ public class SpeechToText extends Service
         }
 
     }
+
+
 }
