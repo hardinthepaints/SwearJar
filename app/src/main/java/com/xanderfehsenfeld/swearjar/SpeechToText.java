@@ -90,7 +90,7 @@ public class SpeechToText extends Service
 
 
     /* IncomingHandler */
-    protected static class IncomingHandler extends Handler
+    protected class IncomingHandler extends Handler
     {
         private WeakReference<SpeechToText> mtarget;
 
@@ -113,11 +113,11 @@ public class SpeechToText extends Service
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
                     {
                          //turn off beep sound
-//                        if ( !mIsStreamSolo )
-//                        {
-//                            mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
-//                            mIsStreamSolo = true;
-//                        }
+                        if ( !mIsStreamSolo )
+                        {
+                            mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
+                            mIsStreamSolo = true;
+                        }
                     }
                     if (!target.mIsListening)
                     {
@@ -128,11 +128,11 @@ public class SpeechToText extends Service
                     break;
 
                 case MSG_RECOGNIZER_CANCEL:
-//                    if (mIsStreamSolo)
-//                    {
-//                        mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, false);
-//                        mIsStreamSolo = false;
-//                    }
+                    if (mIsStreamSolo)
+                    {
+                        mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, false);
+                        mIsStreamSolo = false;
+                    }
                     target.mSpeechRecognizer.cancel();
                     target.mIsListening = false;
                     Log.d(TAG, "message canceled recognizer"); //$NON-NLS-1$
@@ -275,7 +275,7 @@ public class SpeechToText extends Service
         @Override
         public void onPartialResults(Bundle partialResults)
         {
-
+            Log.d(TAG, "SpeechRecognizer.onPartialResults");
         }
 
         @Override
@@ -290,10 +290,10 @@ public class SpeechToText extends Service
             Log.d(TAG, "onReadyForSpeech"); //$NON-NLS-1$
 
             /* cancel the timer so it doesn't interrupt speech process */
-            Log.d("Timer", "onReadyForSpeech: Cancel Timer");
-            if(mTimer != null) {
-                mTimer.cancel();
-            }
+//            Log.d("Timer", "onReadyForSpeech: Cancel Timer");
+//            if(mTimer != null) {
+//                mTimer.cancel();
+//            }
         }
 
         @Override
@@ -324,22 +324,22 @@ public class SpeechToText extends Service
             mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
 
             //Start a timer in case OnReadyForSpeech is never called back (Android Bug?)
-            Log.d("Speech", "onResults: Start a timer");
-            if(mTimer == null) {
-                mTimer = new CountDownTimer(2000, 500) {
-                    @Override
-                    public void onTick(long l) {
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        Log.d("Speech", "Timer.onFinish: Timer Finished, Restart recognizer");
-                        mSpeechRecognizer.cancel();
-                        mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
-                    }
-                };
-            }
-            mTimer.start();
+//            Log.d("Speech", "onResults: Start a timer");
+//            if(mTimer == null) {
+//                mTimer = new CountDownTimer(2000, 500) {
+//                    @Override
+//                    public void onTick(long l) {
+//                    }
+//
+//                    @Override
+//                    public void onFinish() {
+//                        Log.d("Speech", "Timer.onFinish: Timer Finished, Restart recognizer");
+//                        mSpeechRecognizer.cancel();
+//                        mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
+//                    }
+//                };
+//            }
+//            mTimer.start();
 
         }
 
