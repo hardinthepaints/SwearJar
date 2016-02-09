@@ -17,9 +17,13 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -36,11 +40,12 @@ import java.util.concurrent.DelayQueue;
 /** Created By Xander
  * Much of this code is taken from http://stackoverflow.com/questions/18039429/android-speech-recognition-continuous-service
  *
- *   This activity starts a service and recieves results from it to put in a TextView
+ *   This activity starts a service and receives results from it to put in a TextView
  */
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
-    int swearCount = 0;
+    public static final String SWEAR_COUNT = "SWEAR_COUNT";
+    int swearCount = 5;
 
     private static final String TAG = "MainActivity";
 
@@ -115,7 +120,7 @@ public class MainActivity extends Activity {
         /* send the reciever to the service */
         service.putExtra("receiver", resultReceiver );
         mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
-        MainActivity.this.startService(service);
+//        MainActivity.this.startService(service);
 
 
         /* setup result reciever */
@@ -284,6 +289,25 @@ public class MainActivity extends Activity {
         mNotifyMgr.notify(mNotificationId, mBuilder.build());
     }
 
+
+
+    // Menu handling
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.pay_up:
+                Intent i = new Intent(this, CharityActivity.class);
+                i.putExtra(SWEAR_COUNT, swearCount);
+                startActivity(i);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
 
 

@@ -1,0 +1,11 @@
+{
+  "name": "swear_jar",
+  "version": "1.1.1",
+  "description": "You really shouldn't swear",
+  "main": "swear_jar_server.js",
+  "dependencies": {
+    "braintree": "^1.35.1",
+    "express": "^4.12.3",
+    "require": "^2.1.22"
+  }
+}

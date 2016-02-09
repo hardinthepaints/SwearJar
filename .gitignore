@@ -1,7 +1,8 @@
 .gradle
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
+.idea
 .DS_Store
 /build
 /captures
+/server_files/config.json
+/server_files/node_modules
