@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
         /* send the reciever to the service */
         service.putExtra("receiver", resultReceiver );
         mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
-//        MainActivity.this.startService(service);
+        MainActivity.this.startService(service);
 
 
         /* setup result reciever */
