@@ -6,9 +6,9 @@ var PORT=8080;
 var braintree = require("braintree");
 var gateway = braintree.connect({
   environment: braintree.Environment.Sandbox,
-  merchantId: config.merchantId,
-  publicKey: config.publicKey,
-  privateKey: config.privateKey
+  merchantId: config.braintree.merchantId,
+  publicKey: config.braintree.publicKey,
+  privateKey: config.braintree.privateKey
 });
 
 
@@ -20,9 +20,14 @@ app.get('/test', function(req, res){
 
 // braintree logic
 app.get("/client_token", function (req, res) {
-  gateway.clientToken.generate({}, function (err, response) {
-    console.log("clientToken: response");
-    res.send(response.clientToken);
+  gateway.clientToken.generate({"customerId": "Lf3grewr"}, function (err, response) {
+    if(err){
+        console.log(err.message);
+        console.log(config.publicKey);
+    }
+    else{
+        res.send(response.clientToken);
+    }
   });
 });
 
@@ -50,5 +55,5 @@ var server = app.listen(app.get('port'), function() {
     require('dns').lookup(require('os').hostname(), function (err, add, fam) {
             console.log('App listening at http://%s:%s', add, port);
         })
-//    console.log('App listening at http://%s:%s', host, port)
+//    console.log('App listening at http://%s:%s', "172.23.16.99", port)
 });

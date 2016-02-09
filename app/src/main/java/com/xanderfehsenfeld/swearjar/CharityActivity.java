@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,7 +26,7 @@ public class CharityActivity extends AppCompatActivity {
 
     public static final int PAYMENT_REQUEST = 3500;
     private static final String DEBUG = "DEBUG";
-    private static final String BRAINTREE_URL = "http://192.168.56.1:8080";
+    private static final String BRAINTREE_URL = "http://172.23.16.99:8080";
 
     int swearCountMultiplier = 1;
     float swearCost = 0;
@@ -43,7 +44,7 @@ public class CharityActivity extends AppCompatActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             int amount  =  extras.getInt(MainActivity.SWEAR_COUNT);
-            countView.setText("" + amount);
+            countView.setText("$" + amount + ".00");
         }
     }
 
@@ -61,12 +62,15 @@ public class CharityActivity extends AppCompatActivity {
                 );
                 String nonce = paymentMethodNonce.getNonce();
                 float amount = swearCost * swearCountMultiplier;
-                postNonceToServer(nonce,amount);
+                Spinner charitySpinner = (Spinner) findViewById(R.id.spinner_charity);
+                String charity = charitySpinner.getSelectedItem().toString();
+
+                postToServer(nonce, amount);
             }
         }
     }
 
-    private void postNonceToServer(String nonce, float amount) {
+    private void postToServer(String nonce, float amount) {
         RequestParams params = new RequestParams();
         params.put("payment_method_nonce", nonce);
         params.put("amount", amount);

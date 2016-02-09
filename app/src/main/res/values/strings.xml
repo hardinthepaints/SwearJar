@@ -1,4 +1,12 @@
 <resources>
     <string name="app_name">SwearJar</string>
     <string name="pay_up">Pay Off Swears</string>
+    <string name="you_owe">You owe:</string>
+    <string name="choose_charity">Choose a charity to donate to!</string>
+
+    <string-array name="charities">
+        <item>Red Cross</item>
+        <item>Salvation Army</item>
+        <item>Souls 4 Souls</item>
+    </string-array>
 </resources>
