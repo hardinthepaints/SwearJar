@@ -30,6 +30,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -107,21 +108,10 @@ public class MainActivity extends AppCompatActivity {
     /* intent for the result of clicking the notification (used later in makeNotification )*/
     Intent resultIntent = new Intent(this, MainActivity.class);
 
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        /* start the service */
-        Intent service = new Intent(MainActivity.this, SpeechToText.class);
-        /* send the reciever to the service */
-        service.putExtra("receiver", resultReceiver );
-        mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
-        MainActivity.this.startService(service);
-
 
         /* setup result reciever */
         resultReceiver = new MyResultReceiver(null);
@@ -129,8 +119,9 @@ public class MainActivity extends AppCompatActivity {
         header = (TextView)findViewById(R.id.header);
 
 
-
-                //badword = getNewSwearView();
+//        /* start and bind to service */
+//        startSpeechService();
+//        bindToService();
 
         fallingWords = new LinkedList<>();
         animationMap = new HashMap<>();
@@ -162,6 +153,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         badWordQeue = new LinkedList<>();
+
+        /* click the button */
+        findViewById(R.id.button).callOnClick();
 
 
 
@@ -211,10 +205,10 @@ public class MainActivity extends AppCompatActivity {
         protected void onReceiveResult(int resultCode, Bundle resultData) {
 
             if(resultCode == 100){
-                runOnUiThread(new UpdateUI(resultData.getString("start")));
+                //runOnUiThread(new UpdateUI(resultData.getString("start")));
             }
             else if(resultCode == 200){
-                runOnUiThread(new UpdateUI(resultData.getString("end")));
+                //runOnUiThread(new UpdateUI(resultData.getString("end")));
             }
             else{
                 swearCount += resultData.getInt("score");
@@ -229,9 +223,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart()
     {
         super.onStart();
-        Intent i = new Intent(this, SpeechToText.class);
-        i.putExtra("receiver", resultReceiver);
-        bindService(i, mServiceConnection, mBindFlag);
+
+        /* bind to the service (assumes service is already started) */
+        bindToService();
     }
 
 
@@ -242,14 +236,48 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d(TAG, "onStop");
 
+        /* unbind from the service */
+        unbindService();
+
+        /* send out the notification when user navigates away from activity */
+        makeNotification();
+
+    }
+
+    /* Bind the the speech recog service */
+    private void bindToService(){
+        Intent i = new Intent(this, SpeechToText.class);
+        i.putExtra("receiver", resultReceiver);
+        bindService(i, mServiceConnection, mBindFlag);
+    }
+    /* unBind the the speech recog service */
+    private void unbindService(){
         if (mServiceMessenger != null)
         {
             unbindService(mServiceConnection);
             mServiceMessenger = null;
         }
+    }
 
-        /* send out the notification when user navigates away from activity */
-        makeNotification();
+    /* stop and unbind with the service */
+    private void stopSpeechService(){
+
+        Intent service = new Intent(MainActivity.this, SpeechToText.class);
+        MainActivity.this.stopService(service);
+    }
+
+    /* start the continuous speech service and bind to it */
+    private void startSpeechService(){
+
+        /* start the service */
+        Intent service = new Intent(MainActivity.this, SpeechToText.class);
+        /* send the reciever to the service */
+        service.putExtra("receiver", resultReceiver);
+        mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
+        MainActivity.this.startService(service);
+
+        /* bind to the service */
+        //bindToService();
 
     }
 
@@ -307,6 +335,17 @@ public class MainActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void buttonClick(View view){
+        Toast t = Toast.makeText(MainActivity.this, "ButtonClicked!", Toast.LENGTH_SHORT);
+        t.show();
+
+        /* cycle everything */
+        unbindService();
+        stopSpeechService();
+        startSpeechService();
+        bindToService();
     }
 
 

@@ -185,7 +185,7 @@ public class SpeechToText extends Service
 
         /* send end code to parent activity */
         Bundle bundle = new Bundle();
-        bundle.putString("end", "Timer Stopped....");
+        //bundle.putString("end", "Timer Stopped....");
         resultReceiver.send(200, bundle);
     }
 
