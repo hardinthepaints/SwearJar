@@ -1,13 +1,10 @@
 package com.xanderfehsenfeld.swearjar;
 
-import android.app.ActionBar;
-import android.app.Activity;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -16,7 +13,6 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.Bundle;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -28,14 +24,12 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.DelayQueue;
 
 
 /** Created By Xander
@@ -46,7 +40,7 @@ import java.util.concurrent.DelayQueue;
 public class MainActivity extends AppCompatActivity {
 
     public static final String SWEAR_COUNT = "SWEAR_COUNT";
-    int swearCount = 5;
+    int currentScore;
 
     private static final String TAG = "MainActivity";
 
@@ -97,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
 
     /* animate the swearword falling */
     Animation animationFalling;
-    TextView badword;
     Queue<TextView> fallingWords;
 
     /* match text views to their animations */
@@ -108,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
     /* intent for the result of clicking the notification (used later in makeNotification )*/
     Intent resultIntent = new Intent(this, MainActivity.class);
 
+    MediaPlayer mp;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,6 +112,8 @@ public class MainActivity extends AppCompatActivity {
         resultReceiver = new MyResultReceiver(null);
         textView = (TextView)findViewById(R.id.results_field);
         header = (TextView)findViewById(R.id.header);
+
+
 
 
 //        /* start and bind to service */
@@ -140,6 +137,8 @@ public class MainActivity extends AppCompatActivity {
                 public void onAnimationEnd(Animation animation) {
                     TextView animatedView = animationMap.get(animation);
                     fallingWords.add(animatedView);
+                    mp.start();
+
                 }
 
                 @Override
@@ -158,6 +157,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button).callOnClick();
 
 
+        mp = MediaPlayer.create(MainActivity.this, R.raw.coin_sound);
 
     }
 
@@ -188,6 +188,12 @@ public class MainActivity extends AppCompatActivity {
                 toAnimate.setText(badWordQeue.poll());
                 toAnimate.startAnimation(animationFalling);
 
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
             }
 
         }
@@ -211,9 +217,9 @@ public class MainActivity extends AppCompatActivity {
                 //runOnUiThread(new UpdateUI(resultData.getString("end")));
             }
             else{
-                swearCount += resultData.getInt("score");
+                currentScore = resultData.getInt("score");
                 badWordQeue.addAll( resultData.getStringArrayList("badwords") );
-                runOnUiThread(new UpdateUI(swearCount + ""));
+                runOnUiThread(new UpdateUI(resultData.getInt("score") + ""));
             }
         }
     }
@@ -240,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
         unbindService();
 
         /* send out the notification when user navigates away from activity */
-        makeNotification();
+        //makeNotification();
 
     }
 
@@ -273,6 +279,7 @@ public class MainActivity extends AppCompatActivity {
         Intent service = new Intent(MainActivity.this, SpeechToText.class);
         /* send the reciever to the service */
         service.putExtra("receiver", resultReceiver);
+        service.putExtra("score", currentScore);
         mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
         MainActivity.this.startService(service);
 
@@ -282,40 +289,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /* Notification */
-    private void makeNotification(){
-
-        /* create the notification builder */
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.notification_icon)
-                        .setContentTitle("SwearJar")
-                        .setContentText( "Swears: " + swearCount );
-
-
-        // Because clicking the notification opens a new ("special") activity, there's
-        // no need to create an artificial back stack.
-        PendingIntent resultPendingIntent =
-                PendingIntent.getActivity(
-                        this,
-                        0,
-                        resultIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-
-
-        mBuilder.setContentIntent( resultPendingIntent );
-
-        /* ISSUE THE NOTIFICATION */
-
-        // Sets an ID for the notification
-        int mNotificationId = 001;
-        // Gets an instance of the NotificationManager service
-        NotificationManager mNotifyMgr =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        // Builds the notification and issues it.
-        mNotifyMgr.notify(mNotificationId, mBuilder.build());
-    }
+//    /* Notification */
+//    private void makeNotification(){
+//
+//        /* create the notification builder */
+//        NotificationCompat.Builder mBuilder =
+//                new NotificationCompat.Builder(this)
+//                        .setSmallIcon(R.drawable.notification_icon)
+//                        .setContentTitle("SwearJar")
+//                        .setContentText( "Swears: " + currentScore );
+//
+//
+//        // Because clicking the notification opens a new ("special") activity, there's
+//        // no need to create an artificial back stack.
+//        PendingIntent resultPendingIntent =
+//                PendingIntent.getActivity(
+//                        this,
+//                        0,
+//                        resultIntent,
+//                        PendingIntent.FLAG_UPDATE_CURRENT
+//                );
+//
+//
+//        mBuilder.setContentIntent( resultPendingIntent );
+//
+//        /* ISSUE THE NOTIFICATION */
+//
+//        // Sets an ID for the notification
+//        int mNotificationId = 001;
+//        // Gets an instance of the NotificationManager service
+//        NotificationManager mNotifyMgr =
+//                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//        // Builds the notification and issues it.
+//        mNotifyMgr.notify(mNotificationId, mBuilder.build());
+//    }
 
 
 
@@ -329,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.pay_up:
                 Intent i = new Intent(this, CharityActivity.class);
-                i.putExtra(SWEAR_COUNT, swearCount);
+                i.putExtra(SWEAR_COUNT, currentScore);
                 startActivity(i);
                 return true;
             default:
@@ -338,8 +345,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void buttonClick(View view){
-//        Toast t = Toast.makeText(MainActivity.this, "ButtonClicked!", Toast.LENGTH_SHORT);
-//        t.show();
 
         /* cycle everything */
         unbindService();

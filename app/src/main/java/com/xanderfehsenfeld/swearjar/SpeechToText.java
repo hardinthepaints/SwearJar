@@ -30,7 +30,6 @@ import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Timer;
 
 public class SpeechToText extends Service
 {
@@ -47,11 +46,15 @@ public class SpeechToText extends Service
     static final int MSG_RECOGNIZER_START_LISTENING = 1;
     static final int MSG_RECOGNIZER_CANCEL = 2;
 
+
     /* send data back to MainActivity */
     ResultReceiver resultReceiver;
 
     /* keep speech recognizer going */
     CountDownTimer mTimer;
+
+    /* keep track of number of swearwords*/
+    int currentScore = 0;
 
     @Override
     public void onCreate()
@@ -69,12 +72,15 @@ public class SpeechToText extends Service
         Log.d(TAG, "onCreate"); //$NON-NLS-1$
 
 
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         Log.d(TAG, "onStartCommand"); //$NON-NLS-1$
+
+        currentScore = intent.getIntExtra("score", 0);
 
         return START_STICKY;
 
@@ -109,8 +115,8 @@ public class SpeechToText extends Service
                          //turn off beep sound
                         if ( !mIsStreamSolo )
                         {
-                            mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
-                            mIsStreamSolo = true;
+//                            mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
+//                            mIsStreamSolo = true;
                         }
                     }
                     if (!target.mIsListening)
@@ -124,8 +130,8 @@ public class SpeechToText extends Service
                 case MSG_RECOGNIZER_CANCEL:
                     if (mIsStreamSolo)
                     {
-                        mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, false);
-                        mIsStreamSolo = false;
+//                        mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, false);
+//                        mIsStreamSolo = false;
                     }
                     target.mSpeechRecognizer.cancel();
                     target.mIsListening = false;
@@ -197,7 +203,20 @@ public class SpeechToText extends Service
 
         resultReceiver = intent.getParcelableExtra("receiver");
 
+        /* send an initial amount */
+
+
         return mServerMessenger.getBinder();
+    }
+
+    /* send results out */
+    private void sendResults( String result ){
+        /* send info back to parent activity */
+        Bundle bundle = new Bundle();
+        bundle.putInt("score", currentScore);
+        bundle.putStringArrayList("badwords", SpeechAnalyzer.getBadWords(result));
+        bundle.putString("whatWasSaid", result);
+        resultReceiver.send(2, bundle);
     }
 
     protected class SpeechRecognitionListener implements RecognitionListener
@@ -308,32 +327,12 @@ public class SpeechToText extends Service
             Toast t = Toast.makeText(SpeechToText.this, whatWasSaid.get(0), Toast.LENGTH_LONG);
             t.show();
 
-            /* send info back to parent activity */
-            Bundle bundle = new Bundle();
-            bundle.putInt("score", SpeechAnalyzer.analyzeSpeech( whatWasSaid.get(0) ) );
-            bundle.putStringArrayList("badwords", SpeechAnalyzer.getBadWords(whatWasSaid.get(0)));
-            resultReceiver.send(2, bundle);
+            // update score and send results
+            currentScore += SpeechAnalyzer.analyzeSpeech(whatWasSaid.get(0));
+            sendResults(whatWasSaid.get(0));
 
             /* start listening again */
             mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
-
-            //Start a timer in case OnReadyForSpeech is never called back (Android Bug?)
-//            Log.d("Speech", "onResults: Start a timer");
-//            if(mTimer == null) {
-//                mTimer = new CountDownTimer(2000, 500) {
-//                    @Override
-//                    public void onTick(long l) {
-//                    }
-//
-//                    @Override
-//                    public void onFinish() {
-//                        Log.d("Speech", "Timer.onFinish: Timer Finished, Restart recognizer");
-//                        mSpeechRecognizer.cancel();
-//                        mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
-//                    }
-//                };
-//            }
-//            mTimer.start();
 
         }
 
