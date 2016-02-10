@@ -98,6 +98,7 @@ public class SpeechAnalyzer {
             put("black cock", true);
             put("blonde action", true);
             put("blonde on blonde action", true);
+            put("Matthew whitehead", true);
             put("blowjob", true);
             put("blow job", true);
             put("blow your load", true);

@@ -32,7 +32,7 @@
                 android:textColor="@color/bt_black"
                 android:layout_gravity="center"
                 android:id="@+id/results_field"
-                android:textSize="100dp"
+                android:textSize="150dp"
                 android:text="0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -45,21 +45,28 @@
                 android:id="@+id/button"
                 android:onClick="buttonClick"
                 android:layout_gravity="center_horizontal|bottom"
-                android:background = "@drawable/roundedbutton"/>
+                android:background = "@drawable/roundedbutton"
+                android:foregroundTint="@color/bt_blue"/>
 
         </FrameLayout>
 
 
 
+
         <TextView
-            android:visibility="visible"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:layout_marginBottom="@dimen/activity_horizontal_margin"
+            android:layout_marginLeft="@dimen/activity_vertical_margin"
+            android:layout_marginRight="@dimen/activity_vertical_margin"
+            android:visibility="invisible"
             android:textColor="@color/bt_black"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="U"
-        android:textSize="300dp"
-        android:layout_gravity="center"
-        android:id="@+id/jar"/>
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_gravity="center"
+            android:text="U"
+            android:textSize="400dp"
+            android:gravity="center"
+            android:id="@+id/jar"/>
         <!--<ImageView-->
             <!--android:layout_gravity="center"-->
 
