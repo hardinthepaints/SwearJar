@@ -338,8 +338,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void buttonClick(View view){
-        Toast t = Toast.makeText(MainActivity.this, "ButtonClicked!", Toast.LENGTH_SHORT);
-        t.show();
+//        Toast t = Toast.makeText(MainActivity.this, "ButtonClicked!", Toast.LENGTH_SHORT);
+//        t.show();
 
         /* cycle everything */
         unbindService();

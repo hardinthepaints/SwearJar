@@ -29,7 +29,8 @@ public class CharityActivity extends AppCompatActivity {
 
     public static final int PAYMENT_REQUEST = 3500;
     private static final String DEBUG = "DEBUG";
-    private static final String BRAINTREE_URL = "http://10.0.0.98:8080";
+    private static final String PORT = "3000";
+    private static final String BRAINTREE_URL = "http://10.0.0.98:" + PORT;
 
     int swearCountMultiplier = 1;
     float swearCost = 0;
@@ -73,7 +74,7 @@ public class CharityActivity extends AppCompatActivity {
                 Spinner charitySpinner = (Spinner) findViewById(R.id.spinner_charity);
                 String charity = charitySpinner.getSelectedItem().toString();
                 Log.d(DEBUG, "Launching post to server");
-                postToServer(nonce, amount, charity);
+                postToServer("fake-valid-nonce", amount, charity);
             }
         }
     }

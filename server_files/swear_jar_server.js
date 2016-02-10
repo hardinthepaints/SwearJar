@@ -1,14 +1,14 @@
 var express = require('express');
 var app = express();
 var config = require('./config.json');
-var PORT=8080;
+var PORT=3000;
 
 var braintree = require("braintree");
 var gateway = braintree.connect({
   environment: braintree.Environment.Sandbox,
-  merchantId: config.braintree.merchantId,
-  publicKey: config.braintree.publicKey,
-  privateKey: config.braintree.privateKey
+  merchantId: config.merchantId,
+  publicKey: config.publicKey,
+  privateKey: config.privateKey
 });
 
 
@@ -20,10 +20,9 @@ app.get('/test', function(req, res){
 
 // braintree logic
 app.get("/client_token", function (req, res) {
-  gateway.clientToken.generate({"customerId": "Lf3grewr"}, function (err, response) {
+  gateway.clientToken.generate({}, function (err, response) {
     if(err){
         console.log(err.message);
-        console.log(config.braintree.publicKey);
     }
     else{
         res.send(response.clientToken);
@@ -32,16 +31,20 @@ app.get("/client_token", function (req, res) {
 });
 
 app.post("/checkout", function (req, res) {
-    console.log("body: %j" ,req);
-  var nonce = req.body.payment_method_nonce;
-  var amount = req.body.amount;
-  console.log("nonce: " + nonce + " amount: " + amount);
-    gateway.transaction.sale({
-      amount: amount,
-      paymentMethodNonce: nonce,
-    }, function (err, result) {
-        console.log("checkout transaction sale result: " + result);
-    });
+  if(!!!req.body){
+    console.log("Unable to find request.");
+  }
+  else{
+      var nonce = req.body.payment_method_nonce;
+      var amount = req.body.amount;
+      console.log("nonce: " + nonce + " amount: " + amount);
+        gateway.transaction.sale({
+          amount: amount,
+          paymentMethodNonce: nonce,
+        }, function (err, result) {
+            console.log("checkout transaction sale result: " + result);
+        });
+   }
 });
 
 
@@ -57,5 +60,5 @@ var server = app.listen(app.get('port'), function() {
     require('dns').lookup(require('os').hostname(), function (err, add, fam) {
             console.log('App listening at http://%s:%s', add, port);
         })
-//    console.log('App listening at http://%s:%s', "172.23.16.99", port)
+//    console.log('App listening at http://%s:%s', host, port)
 });
