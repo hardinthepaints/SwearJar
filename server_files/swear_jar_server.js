@@ -23,7 +23,7 @@ app.get("/client_token", function (req, res) {
   gateway.clientToken.generate({"customerId": "Lf3grewr"}, function (err, response) {
     if(err){
         console.log(err.message);
-        console.log(config.publicKey);
+        console.log(config.braintree.publicKey);
     }
     else{
         res.send(response.clientToken);
@@ -32,8 +32,10 @@ app.get("/client_token", function (req, res) {
 });
 
 app.post("/checkout", function (req, res) {
+    console.log("body: %j" ,req);
   var nonce = req.body.payment_method_nonce;
   var amount = req.body.amount;
+  console.log("nonce: " + nonce + " amount: " + amount);
     gateway.transaction.sale({
       amount: amount,
       paymentMethodNonce: nonce,

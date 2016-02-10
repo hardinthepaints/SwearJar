@@ -19,7 +19,7 @@
         android:layout_gravity="center_horizontal"
         android:gravity="center"
         android:layout_marginTop="50dp"
-        android:layout_weight=".3">
+        android:layout_weight=".2">
 
         <TextView
             android:layout_width="wrap_content"
@@ -65,5 +65,5 @@
         android:layout_gravity="center"
         android:textColor="@color/colorPrimaryLight"
         android:textColorHighlight="@color/colorAccent"
-        android:layout_weight=".4"/>
+        android:layout_weight="0.24"/>
 </LinearLayout>
