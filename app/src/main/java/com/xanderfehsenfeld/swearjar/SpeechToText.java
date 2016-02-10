@@ -74,12 +74,6 @@ public class SpeechToText extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-
-
-        /* get the result reciever which was sent when this services was started */
-        resultReceiver = intent.getParcelableExtra("receiver");
-
-
         Log.d(TAG, "onStartCommand"); //$NON-NLS-1$
 
         return START_STICKY;
@@ -191,7 +185,7 @@ public class SpeechToText extends Service
 
         /* send end code to parent activity */
         Bundle bundle = new Bundle();
-        bundle.putString("end", "Timer Stopped....");
+        //bundle.putString("end", "Timer Stopped....");
         resultReceiver.send(200, bundle);
     }
 
